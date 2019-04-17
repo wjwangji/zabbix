@@ -1,0 +1,86 @@
+version: '3'
+services:
+  zabbix-mysql:
+    image: mysql:5.7
+    container_name: zabbix-mysql
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: zabbix
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: zabbixpassword
+    volumes:
+      - ./zabbix_mysql_data:/var/lib/mysql                              
+    networks:
+      zabbix-networks:
+        ipv4_address: 172.19.0.131
+
+  zabbix-web-apache-mysql:
+    image: zabbix/zabbix-web-apache-mysql
+    container_name: zabbix-web-apache-mysql
+    environment:
+      DB_SERVER_HOST: zabbix-mysql
+      MYSQL_DATABASE: zabbix
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: zabbixpassword
+      MYSQL_ROOT_PASSWORD: rootpassword
+      ZBX_SERVER_HOST: zabbix-server-mysql
+      PHP_TZ: Asia/Shanghai
+      ZBX_LOGFILE: /tmp/ser.log
+    ports:
+      - '12345:80'
+      - '443:443'
+    links:
+      - zabbix-mysql
+      - zabbix-server-mysql
+    depends_on:
+      - zabbix-mysql
+      - zabbix-server-mysql                            
+    networks:
+      zabbix-networks:
+        ipv4_address: 172.19.0.132 
+
+  zabbix-server-mysql:
+    image: zabbix/zabbix-server-mysql
+    container_name: zabbix-server-mysql
+    environment:
+      DB_SERVER_HOST: zabbix-mysql
+      MYSQL_DATABASE: zabbix
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: zabbixpassword
+      MYSQL_ROOT_PASSWORD: rootpassword
+      ZBX_LOGFILE: /tmp/ser.log
+   
+    ports:
+      - '10051:10051'
+    links:
+      - zabbix-mysql
+    depends_on:
+      - zabbix-mysql                             
+    networks:
+      zabbix-networks:
+        ipv4_address: 172.19.0.133
+
+  zabbix-agent:
+    image: zabbix/zabbix-agent
+    container_name: zabbix-server-agent
+    environment:
+      ZBX_HOSTNAME: Zabbix server
+      ZBX_SERVER_HOST: zabbixserverhost
+      ZBX_LOGFILE: /tmp/agent.log
+    ports:
+      - '10050:10050'
+    links:
+      - zabbix-server-mysql:zabbixserverhost
+    depends_on:
+      - zabbix-server-mysql                             
+    networks:
+      zabbix-networks:
+        ipv4_address: 172.19.0.134        
+
+networks:
+  zabbix-networks:
+    ipam:
+      config:
+       - subnet: 172.19.0.0/24
