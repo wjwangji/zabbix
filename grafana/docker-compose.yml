@@ -1,0 +1,25 @@
+version: "3"
+services:
+  grafana:
+    image: "grafana/grafana:6.0.1"
+    container_name: "grafana"
+    ports:
+      - "9999:3000"
+    environment:
+      #- "GF_SERVER_ROOT_URL=grafana.bboysoul.com"
+      - "GF_SECURITY_ADMIN_PASSWORD=zts"
+      - "GF_INSTALL_PLUGINS=alexanderzobnin-zabbix-app"
+    restart: "always"
+    volumes:
+      - "grafana-data:/var/lib/grafana"
+      - "grafana-etc:/etc/grafana/"
+      - "grafana-logs:/var/log/grafana"
+      - "grafana-home:/usr/share/grafana"
+    extra_hosts:
+       - "zabbix.bboysoul.com:10.10.10.10" 
+
+volumes:
+  grafana-data:
+  grafana-etc:
+  grafana-logs:
+  grafana-home:   
