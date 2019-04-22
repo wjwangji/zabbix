@@ -11,23 +11,15 @@ services:
       - "GF_INSTALL_PLUGINS=alexanderzobnin-zabbix-app"
     restart: "always"
     volumes:
-      - "grafana-data:/var/lib/grafana"
-      - "grafana-etc:/etc/grafana/"
-      - "grafana-logs:/var/log/grafana"
-      - "grafana-home:/usr/share/grafana"
+      - ./grafana-data:/var/lib/grafana
+      ###3- "./grafana-etc:/etc/grafana/"
+      ###- "./grafana-logs:/var/log/grafana"
+      ###- "./grafana-home:/usr/share/grafana"
     extra_hosts:
        - "zabbix.bboysoul.com:10.10.10.10"                           
     networks:
-      zabbix-networks:
-        ipv4_address: 172.19.0.136
-
-volumes:
-  grafana-data:
-  grafana-etc:
-  grafana-logs:
-  grafana-home:   
+      - zabbix-grafana    
         
 networks:
-  zabbix-networks:
-    external:
-    name: zabbix_zabbix-networks
+    zabbix-grafana:
+        external: true
